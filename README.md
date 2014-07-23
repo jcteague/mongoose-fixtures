@@ -113,11 +113,11 @@ describe("related data", function(){
 		fixtures.user1.company.should.eql(fixtures.testCompany._id);
 	});
 })
-```js
+```
 ### Use with AutoTestjs
 I've tested this module on real world applications in conjuction with [AutoFixture.js](href="https://github.com/jcteague/autofixturejs") to create the test data for me.  In the spirit of small modules working together, they have been separated.  To use them together is very simple:
 
-```
+```js
 var FixturePrep = require("mongoose-fixture-prep");
 var factory = require('AutoFixture')
 var fixtures = new FixturePrep();
