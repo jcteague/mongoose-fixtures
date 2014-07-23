@@ -23,16 +23,22 @@ You also provide a callback to call when all models have been created.
 var FixturePrep = require("mongoose-fixture-prep");
 var fixtures = new FixturePrep();
 
-define("creating a test", function(){
-		before(function(done){
-			fixtures.create([{name:'user1',model: 'User', val:{firstName:'John',lastName:'Smith'}}], done)				
-		})
-		
-		it("should be able to access the object you saved", function(){
-			//user1 is attached to the
-			(fixtures.user1 === null).should.not.be.true;
-		}
-})
+describe("creating single fixture",function(){
+	before(function(done){
+		fixtures.create(
+			[
+				{name:'user1',model: 'User', val:{firstName:'John',lastName:'Smith'}}
+			], done);
+	});
+	after(function(done){fixtures.clean_up(done)});
+
+	it("should be able to access the object you saved", function(){
+		//user1 is attached to the
+		fixtures.should.have.property('user1');
+		//it's has been saved and now has the _id field
+		fixtures.user1.should.have.property('_id');
+	});
+});
 ```
 ### Creating multiple models
 You pass into the create function an array of data to create so that you can create multiple objects.  the function handles all of the asynchrounous stuff so that your tests stay clean and readable
@@ -41,19 +47,21 @@ You pass into the create function an array of data to create so that you can cre
 var FixturePrep = require("mongoose-fixture-prep");
 var fixtures = new FixturePrep();
 
-define("creating a test", function(){
-		before(function(done){
-			fixtures.create([{name:'user1',model: 'User', val:{firstName:'John',lastName:'Smith'}},
-											 {name:'admin',model: 'User', val:{firstName:'super',lastName:'user', roles:['admin']}}
-											], done)				
-		})
+describe("creating a multiple fixtures", function(){
+	before(function(done){
+		fixtures.create([{name:'user1',model: 'User', val:{firstName:'John',lastName:'Smith'}},
+										 {name:'admin',model: 'User', val:{firstName:'super',lastName:'user', roles:['admin']}}
+										], done)				
+	})
+	
+	it("should be able to access the object you saved", function(){
+		//user1 is attached to the
+		fixtures.should.have.property('user1');
+		fixtures.should.have.property('admin');
 		
-		it("should be able to access the object you saved", function(){
-			//user1 is attached to the
-			(fixtures.user1 === null).should.not.be.true;
-			(fixtures.admin === null).should.not.be.true;
-		}
-})
+		fixtures.admin.should.have.property('_id');
+	});
+});
 ```
 ### Create an array of data
 If your testing something that requires an array of data, you can pass in an array for the val parameter, and they will all be saved and all be accessible by the field name you provided
@@ -62,19 +70,19 @@ If your testing something that requires an array of data, you can pass in an arr
 var FixturePrep = require("mongoose-fixture-prep");
 var fixtures = new FixturePrep();
 
-define("creating a test", function(){
-		before(function(done){
-			fixtures.create([{name:'users',model: 'User', val:[{firstName:'John',lastName:'Smith'},{firstName:'Jane',lastName:'Doe'}]},
-											 {name:'admin',model: 'User', val:{firstName:'super',lastName:'user', roles:['admin']}}
-											], done)				
-		})
-		
-		it("should be able to access the object you saved", function(){
-			//user1 is attached to the
-			fixtures.users.length.should.eql(2);
-			(fixtures.admin === null).should.not.be.true;
-		}
-})
+describe("creating an array of data", function(){
+	before(function(done){
+		fixtures.create([{name:'users',model: 'User', val:[{firstName:'John',lastName:'Smith'},{firstName:'Jane',lastName:'Doe'}]},
+										 {name:'admin',model: 'User', val:{firstName:'super',lastName:'user', roles:['admin']}}
+										], done)				
+	});
+	
+	it("should be able to access the object you saved", function(){
+		//user1 is attached to the
+		fixtures.users.length.should.eql(2);
+		fixtures.should.have.property('admin');
+	});
+});
 ```
 
 ### Creating Related Data
@@ -86,42 +94,47 @@ As an example of how you can define related data, this is how you could model an
 var FixturePrep = require("mongoose-fixture-prep");
 var fixtures = new FixturePrep();
 
-define("creating a test", function(){
-		before(function(done){
-			fixtures.create(
-				[
-					{name:'product_a',model: 'Product', val:{title:"Product A",description: "Product A Description"	},
-					{name:"order1",model:'Order',val:function(fixtures){
-						return new Order({line_items:[product:fixtures.product_a}])
-					};
-				], done)				
-		})
-		
-		it("should have the saved product in the line items", function(){
-			//user1 is attached to the			
-			fixtures.order1.line_items[0].id.should.not.be.empty
-		}
+describe("related data", function(){
+	before(function(done){
+		user_with_company = function(fixtures){
+			return {firstName:'John',lastName:'Smith', company: fixtures.testCompany}
+		};
+		fixtures.create(
+			[
+				{name:'testCompany',model:'Company',val:{name:'my company'}},
+				{name:'user1',model: 'User', val:user_with_company}
+
+			], done)				
+	})
+	
+	it("should have the saved product in the line items", function(){
+	
+		fixtures.user1.should.have.property('company');
+		fixtures.user1.company.should.eql(fixtures.testCompany._id);
+	});
 })
 ```
 ### Use with AutoTestjs
-I've tested this module on real world applications in conjuction with [AutoFixture.js](href="https://github.com/jcteague/autofixturejs") to create the test data for me.  In the spirit of small modules working together, they have been separated into two.  To use them together is very simple:
+I've tested this module on real world applications in conjuction with [AutoFixture.js](href="https://github.com/jcteague/autofixturejs") to create the test data for me.  In the spirit of small modules working together, they have been separated.  To use them together is very simple:
 
 ```
 var FixturePrep = require("mongoose-fixture-prep");
 var factory = require('AutoFixture')
 var fixtures = new FixturePrep();
 
-define("creating a test", function(){
-		before(function(done){
-			Factory.define('User',['first_name','last_name','email'])
-			
-			fixtures.create([{name:'user1',model: 'User', val:Factory.create('User')}], done)				
-		})
-		
-		it("should be able to access the object you saved", function(){
-			//user1 is attached to the
-			(fixtures.user1 === null).should.not.be.true;
-		}
+describe('using with autofixture',function(){
+	before(function(done){
+		factory.define('User',['firstName','lastName'])
+		fixtures.create([
+			{name:'user1',model:'User',val:factory.create('User')}
+		],done);
+	});
+
+	it("should create the fixtures from the factory",function(){
+		fixtures.should.have.property('user1');
+		//it's has been saved and now has the _id field
+		fixtures.user1.should.have.property('_id');
+	})
 })
 ```
 
