@@ -115,7 +115,7 @@ describe("related data", function(){
 })
 ```
 ### Use with AutoTestjs
-I've tested this module on real world applications in conjuction with [AutoFixture.js](href="https://github.com/jcteague/autofixturejs") to create the test data for me.  In the spirit of small modules working together, they have been separated.  To use them together is very simple:
+I've tested this module on real world applications in conjuction with [AutoFixture.js]("https://github.com/jcteague/autofixturejs") to create the test data for me.  In the spirit of small modules working together, they have been separated.  To use them together is very simple:
 
 ```js
 var FixturePrep = require("mongoose-fixture-prep");
