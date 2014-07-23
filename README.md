@@ -19,7 +19,7 @@ The create method can create and any model you've defined.  After it saves the m
 You also provide a callback to call when all models have been created.
 
 ### Creating a single object
-```
+```js
 var FixturePrep = require("mongoose-fixture-prep");
 var fixtures = new FixturePrep();
 
@@ -43,7 +43,7 @@ describe("creating single fixture",function(){
 ### Creating multiple models
 You pass into the create function an array of data to create so that you can create multiple objects.  the function handles all of the asynchrounous stuff so that your tests stay clean and readable
 
-```
+```js
 var FixturePrep = require("mongoose-fixture-prep");
 var fixtures = new FixturePrep();
 
@@ -66,7 +66,7 @@ describe("creating a multiple fixtures", function(){
 ### Create an array of data
 If your testing something that requires an array of data, you can pass in an array for the val parameter, and they will all be saved and all be accessible by the field name you provided
 
-```
+```js
 var FixturePrep = require("mongoose-fixture-prep");
 var fixtures = new FixturePrep();
 
@@ -90,7 +90,7 @@ If your object model has related data, it's get's pretty tricky setting up all o
 
 As an example of how you can define related data, this is how you could model an order with products, where an order has line items with products.
 
-```
+```js
 var FixturePrep = require("mongoose-fixture-prep");
 var fixtures = new FixturePrep();
 
@@ -113,7 +113,7 @@ describe("related data", function(){
 		fixtures.user1.company.should.eql(fixtures.testCompany._id);
 	});
 })
-```
+```js
 ### Use with AutoTestjs
 I've tested this module on real world applications in conjuction with [AutoFixture.js](href="https://github.com/jcteague/autofixturejs") to create the test data for me.  In the spirit of small modules working together, they have been separated.  To use them together is very simple:
 
