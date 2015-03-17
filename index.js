@@ -64,7 +64,7 @@ FixturePrep.prototype.clean_up = function clean_up(done) {
 
         function cleanUpCallback(model,callback){
 
-            if(model) model.collection.drop(function(err){
+            if(model) model.collection.remove({}, function(err){
                 callback();
             });
     },
